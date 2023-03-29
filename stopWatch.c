@@ -176,15 +176,16 @@ void getButtonPressDuration(void *buttonPort) {
                         (void) pthread_mutex_lock(&runningStateMutex);
                         //if the watch is currently running, stop it
                         if(watchRunningState == 1) {
+                            (void) pthread_mutex_unlock(&runningStateMutex);
                             stopWatch();
                             signalSentFlag = 1;
                         }
                         //if the watch is currently stopped, start it
                         if(watchRunningState == 0) {
+                            (void) pthread_mutex_unlock(&runningStateMutex);
                             startWatch();
                             signalSentFlag = 1;
                         }
-                        (void) pthread_mutex_unlock(&runningStateMutex);
                     }
                     //If the buttonPort corresponds with reset, set the counter to 0
                     if(strcmp((char*) buttonPort,  GPIO_PATH_69) == 0) {
