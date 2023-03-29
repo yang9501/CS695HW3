@@ -121,7 +121,7 @@ void displayTimerThread() {
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
-            printf("%.6f", timerInMilliseconds);
+            printf("%.6f\n", timerInMilliseconds);
             fflush(stdout);
             (void) pthread_mutex_unlock(&timerMutex);
         }
