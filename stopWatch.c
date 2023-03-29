@@ -33,7 +33,9 @@ void getButtonPressDuration(void *buttonPort);
 
 void startWatch();
 void stopWatch();
-int msleep(long msec);
+void msleep(long msec);
+void updateTimerThread();
+void displayTimerThread();
 
 pthread_mutex_t timerMutex;
 float timerInMilliseconds;
@@ -41,7 +43,7 @@ float timerInMilliseconds;
 pthread_mutex_t runningStateMutex;
 int watchRunningState;
 
-uint32_t main(void) {
+int main(void) {
     //arrays containing GPIO port definitions, representing the green and red lights, and the start/stop and reset buttons
 	char lightPorts[2][25] = {GPIO_PATH_44, GPIO_PATH_68}; //lightPorts[0] is the green light, lightPorts[1] is the red
     char buttonPorts[2][25] = {GPIO_PATH_66, GPIO_PATH_69}; //buttonPorts[0] is the start/stop, buttonPorts[1] is the reset
@@ -70,19 +72,19 @@ uint32_t main(void) {
     //Initialize GPIO port values
     setInitialState(lightPorts[0], lightPorts[1]);
 
-    /* Create independent threads each of which will execute function */
+    // Create independent threads each of which will execute function
     pthread_t thread1, thread2, thread3, thread4;
     #ifdef DEBUG
     //Since the button/interrupt functionality depends on GPIO input, disable it during debug mode
     pthread_create( &thread3, NULL, (void *) trafficLight1Thread, trafficLight1Ports);
     pthread_create( &thread4, NULL, (void *) trafficLight2Thread, trafficLight2Ports);
     #else
-    //(void) pthread_create( &thread1, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[0]);
-    //(void) pthread_create( &thread2, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[1]);
-    //(void) pthread_create( &thread3, NULL, (void *) updateTimerThread, NULL);
-    //(void) pthread_create( &thread4, NULL, (void *) displayTimerThread, NULL);
+    (void) pthread_create( &thread1, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[0]);
+    (void) pthread_create( &thread2, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[1]);
+    (void) pthread_create( &thread3, NULL, (void *) updateTimerThread, NULL);
+    (void) pthread_create( &thread4, NULL, (void *) displayTimerThread, NULL);
 
-    //(void) pthread_join(thread3, NULL);
+    (void) pthread_join(thread3, NULL);
     #endif
 
 
@@ -90,7 +92,7 @@ uint32_t main(void) {
 }
 
 //Sleep for the requested number of milliseconds
-int msleep(long milliseconds) {
+void msleep(long milliseconds) {
     struct timespec ts;
 
     ts.tv_sec = milliseconds / 1000;
@@ -119,14 +121,15 @@ void updateTimerThread() {
 
 /////////////////////////////////
 //TODO: Format display output into seconds:milliseconds
+//TODO: Add RMS priority functionality to each of the threads
 /////////////////////////////////
 void displayTimerThread() {
     while(1) {
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
-            printf(timerInMilliseconds);
-            fflush();
+            printf("%.6f", timerInMilliseconds);
+            fflush(stdout);
             (void) pthread_mutex_unlock(&timerMutex);
         }
         (void) pthread_mutex_unlock(&runningStateMutex);
@@ -135,7 +138,7 @@ void displayTimerThread() {
 }
 
 void startWatch() {
-    (void) pthread_mutex_lock(&runningStateMutex)
+    (void) pthread_mutex_lock(&runningStateMutex);
     watchRunningState = 1;
     #ifdef DEBUG
     (void) printf("Green on: %s\n", GPIO_PATH_44);
@@ -148,7 +151,7 @@ void startWatch() {
 }
 
 void stopWatch() {
-    (void) pthread_mutex_lock(&runningStateMutex)
+    (void) pthread_mutex_lock(&runningStateMutex);
     watchRunningState = 0;
     #ifdef DEBUG
     (void) printf("Green off: %s\n", GPIO_PATH_44);
