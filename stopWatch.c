@@ -187,6 +187,8 @@ void getButtonPressDuration(void *buttonPort) {
                     if(strcmp((char*) buttonPort,  GPIO_PATH_69) == 0) {
                         (void) pthread_mutex_lock(&timerMutex);
                         timerInMilliseconds = 0;
+                        printf("%.6f\n", timerInMilliseconds);
+                        fflush(stdout);
                         (void) pthread_mutex_unlock(&timerMutex);
                         signalSentFlag = 1;
                     }
