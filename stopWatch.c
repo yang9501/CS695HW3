@@ -118,6 +118,8 @@ void updateTimerThread() {
 /////////////////////////////////
 void displayTimerThread() {
     while(1) {
+        printf("printThread\n");
+        fflush(stdout);
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
