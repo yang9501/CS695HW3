@@ -164,8 +164,6 @@ void getButtonPressDuration(void *buttonPort) {
         gpioValue = readGPIO("/value", (char *) buttonPort);
         if(gpioValue == 1){
             //first press detected
-            printf("HELLO\n");
-            fflush(stdout);
             if(pressedFlag == 0) {
                 pressedFlag = 1;
                 if(signalSentFlag == 0) {
