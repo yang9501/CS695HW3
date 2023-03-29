@@ -118,8 +118,6 @@ void updateTimerThread() {
 /////////////////////////////////
 void displayTimerThread() {
     while(1) {
-        printf("printThread\n");
-        fflush(stdout);
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
@@ -181,7 +179,7 @@ void getButtonPressDuration(void *buttonPort) {
                             signalSentFlag = 1;
                         }
                         //if the watch is currently stopped, start it
-                        if(watchRunningState == 0) {
+                        else if(watchRunningState == 0) {
                             (void) pthread_mutex_unlock(&runningStateMutex);
                             startWatch();
                             signalSentFlag = 1;
