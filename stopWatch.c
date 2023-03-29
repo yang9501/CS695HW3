@@ -122,7 +122,7 @@ void displayTimerThread() {
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
-            printf("%.2f\n", timerInMilliseconds/1000.0f);
+            printf("%.1f\n", timerInMilliseconds/1000.0f);
             fflush(stdout);
             (void) pthread_mutex_unlock(&timerMutex);
         }
@@ -156,6 +156,10 @@ void stopWatch() {
     (void) writeLED("/value", GPIO_PATH_68, "1");
     #endif
     (void) pthread_mutex_unlock(&runningStateMutex);
+    (void) pthread_mutex_lock(&timerMutex);
+    printf("%.2f\n", timerInMilliseconds/1000.0f);
+    fflush(stdout);
+    (void) pthread_mutex_unlock(&timerMutex);
 }
 
 void getButtonPressDuration(void *buttonPort) {
@@ -189,7 +193,7 @@ void getButtonPressDuration(void *buttonPort) {
                     if(strcmp((char*) buttonPort,  GPIO_PATH_69) == 0) {
                         (void) pthread_mutex_lock(&timerMutex);
                         timerInMilliseconds = 0;
-                        printf("%.6f\n", timerInMilliseconds);
+                        printf("%.2f\n", timerInMilliseconds/1000.0f);
                         fflush(stdout);
                         (void) pthread_mutex_unlock(&timerMutex);
                         signalSentFlag = 1;
