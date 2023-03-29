@@ -74,19 +74,12 @@ int main(void) {
 
     // Create independent threads each of which will execute function
     pthread_t thread1, thread2, thread3, thread4;
-    #ifdef DEBUG
-    //Since the button/interrupt functionality depends on GPIO input, disable it during debug mode
-    pthread_create( &thread3, NULL, (void *) trafficLight1Thread, trafficLight1Ports);
-    pthread_create( &thread4, NULL, (void *) trafficLight2Thread, trafficLight2Ports);
-    #else
     (void) pthread_create( &thread1, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[0]);
     (void) pthread_create( &thread2, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[1]);
     (void) pthread_create( &thread3, NULL, (void *) updateTimerThread, NULL);
     (void) pthread_create( &thread4, NULL, (void *) displayTimerThread, NULL);
 
     (void) pthread_join(thread3, NULL);
-    #endif
-
 
 	return 0;
 }
@@ -171,6 +164,8 @@ void getButtonPressDuration(void *buttonPort) {
         gpioValue = readGPIO("/value", (char *) buttonPort);
         if(gpioValue == 1){
             //first press detected
+            printf("HELLO\n");
+            fflush(stdout);
             if(pressedFlag == 0) {
                 pressedFlag = 1;
                 if(signalSentFlag == 0) {
