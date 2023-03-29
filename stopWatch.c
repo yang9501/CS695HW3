@@ -102,12 +102,13 @@ void updateTimerThread() {
             (void) pthread_mutex_lock(&timerMutex);
             //If the counter value + 10 would be greater than the maximum value of float, rollover to zero
             if(FLT_MAX - 10 < timerInMilliseconds) {
-                timerInMilliseconds = 0;
+                timerInMilliseconds = 0.0f;
             }
-            timerInMilliseconds = timerInMilliseconds + 10;
+            timerInMilliseconds = timerInMilliseconds + 10.0f;
             (void) pthread_mutex_unlock(&timerMutex);
         }
         (void) pthread_mutex_unlock(&runningStateMutex);
+        //Maintain to resolution of 10 milliseconds
         msleep(10);
     }
 }
@@ -121,11 +122,12 @@ void displayTimerThread() {
         (void) pthread_mutex_lock(&runningStateMutex);
         if (watchRunningState == 1) {
             (void) pthread_mutex_lock(&timerMutex);
-            printf("%.6f\n", timerInMilliseconds);
+            printf("%.2f\n", timerInMilliseconds/1000.0f);
             fflush(stdout);
             (void) pthread_mutex_unlock(&timerMutex);
         }
         (void) pthread_mutex_unlock(&runningStateMutex);
+        //update terminal display every 100 milliseconds
         msleep(100);
     }
 }
@@ -202,6 +204,7 @@ void getButtonPressDuration(void *buttonPort) {
                 signalSentFlag = 0;
             }
         }
+        //Read buttons every 10 milliseconds
         msleep(10);
     }
 }
