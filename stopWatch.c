@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <float.h>
+#include <sched.h>
 
 //comment out to live run
 //#define DEBUG 1
@@ -74,10 +75,33 @@ int main(void) {
 
     // Create independent threads each of which will execute function
     pthread_t thread1, thread2, thread3, thread4;
-    (void) pthread_create( &thread1, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[0]);
-    (void) pthread_create( &thread2, NULL, (void*) getButtonPressDuration, (void*) buttonPorts[1]);
-    (void) pthread_create( &thread3, NULL, (void *) updateTimerThread, NULL);
-    (void) pthread_create( &thread4, NULL, (void *) displayTimerThread, NULL);
+    pthread_attr_t tattr1, tattr2, tattr3, tattr4;
+    sched_param param1, param2, param3, param4;
+
+    pthread_attr_init(&tattr1);
+    pthread_attr_init(&tattr2);
+    pthread_attr_init(&tattr3);
+    pthread_attr_init(&tattr4);
+
+    pthread_attr_getschedparam(&tattr1, &param1);
+    pthread_attr_getschedparam(&tattr2, &param2);
+    pthread_attr_getschedparam(&tattr3, &param3);
+    pthread_attr_getschedparam(&tattr4, &param4);
+
+    param1.sched_priority = 90;
+    param2.sched_priority = 90;
+    param3.sched_priority = 80;
+    param4.sched_priority = 20;
+
+    pthread_attr_setschedparam(&tattr1, &param1);
+    pthread_attr_setschedparam(&tattr2, &param2);
+    pthread_attr_setschedparam(&tattr3, &param3);
+    pthread_attr_setschedparam(&tattr4, &param4);
+
+    (void) pthread_create( &thread1, &tattr1, (void*) getButtonPressDuration, (void*) buttonPorts[0]);
+    (void) pthread_create( &thread2, &tattr2, (void*) getButtonPressDuration, (void*) buttonPorts[1]);
+    (void) pthread_create( &thread3, &tattr3, (void *) updateTimerThread, NULL);
+    (void) pthread_create( &thread4, &tattr4, (void *) displayTimerThread, NULL);
 
     (void) pthread_join(thread3, NULL);
 
@@ -93,8 +117,6 @@ void msleep(long milliseconds) {
     nanosleep(&ts, &ts);
 }
 
-//https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
-//https://stackoverflow.com/questions/48711243/execute-action-every-x-milliseconds-in-while-loop
 void updateTimerThread() {
     while(1) {
         (void) pthread_mutex_lock(&runningStateMutex);
@@ -114,7 +136,6 @@ void updateTimerThread() {
 }
 
 /////////////////////////////////
-//TODO: Format display output into seconds:milliseconds
 //TODO: Add RMS priority functionality to each of the threads
 /////////////////////////////////
 void displayTimerThread() {
