@@ -76,7 +76,7 @@ int main(void) {
     // Create independent threads each of which will execute function
     pthread_t thread1, thread2, thread3, thread4;
     pthread_attr_t tattr1, tattr2, tattr3, tattr4;
-    sched_param param1, param2, param3, param4;
+    struct sched_param param1, param2, param3, param4;
 
     pthread_attr_init(&tattr1);
     pthread_attr_init(&tattr2);
