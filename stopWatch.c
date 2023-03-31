@@ -13,13 +13,11 @@
 //comment out to live run
 //#define DEBUG 1
 
-#define GPIO_PATH_44 "/sys/class/gpio/gpio44" //Green 1
-#define GPIO_PATH_68 "/sys/class/gpio/gpio68" //Red 1
+#define GPIO_PATH_44 "/sys/class/gpio/gpio44" //Green light
+#define GPIO_PATH_68 "/sys/class/gpio/gpio68" //Red light
 
 #define GPIO_PATH_66 "/sys/class/gpio/gpio66" //Start/Stop Button
 #define GPIO_PATH_69 "/sys/class/gpio/gpio69" //Reset Button
-
-#define BUTTON_PRESS_DURATION 5
 
 //Writes specified value to specified GPIO directory
 static void writeLED(char *filename, char *port, char *value);
@@ -88,9 +86,12 @@ int main(void) {
     pthread_attr_getschedparam(&tattr3, &param3);
     pthread_attr_getschedparam(&tattr4, &param4);
 
+    //Button priority is highest
     param1.sched_priority = 90;
     param2.sched_priority = 90;
+    //Timer update thread is second highest
     param3.sched_priority = 80;
+    //Display output has lowest priority
     param4.sched_priority = 20;
 
     pthread_attr_setschedparam(&tattr1, &param1);
@@ -117,6 +118,7 @@ void msleep(long milliseconds) {
     nanosleep(&ts, &ts);
 }
 
+//Updates the timer counter every 10ms.  When timer reaches the max of float value, rolls over to 0.
 void updateTimerThread() {
     while(1) {
         (void) pthread_mutex_lock(&runningStateMutex);
@@ -135,9 +137,7 @@ void updateTimerThread() {
     }
 }
 
-/////////////////////////////////
-//TODO: Add RMS priority functionality to each of the threads
-/////////////////////////////////
+//Outputs timer to stdout every 100ms when running state is 'on'
 void displayTimerThread() {
     while(1) {
         (void) pthread_mutex_lock(&runningStateMutex);
@@ -153,6 +153,7 @@ void displayTimerThread() {
     }
 }
 
+//Modifies running state to 'on', toggles lights
 void startWatch() {
     (void) pthread_mutex_lock(&runningStateMutex);
     watchRunningState = 1;
@@ -166,6 +167,7 @@ void startWatch() {
     (void) pthread_mutex_unlock(&runningStateMutex);
 }
 
+//Modifies running state to 'off', toggles lights, and displays timer at stoppage
 void stopWatch() {
     (void) pthread_mutex_lock(&runningStateMutex);
     watchRunningState = 0;
